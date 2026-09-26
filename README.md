@@ -1,6 +1,6 @@
-<img src="brand/icon/icon-taag-wordmarks-on-obsidian-1024.png" align="left" width="128" hspace="16" alt="taag-wordmarks icon">
+<img src="brand/icon/icon-wordmark-on-obsidian-1024.png" align="left" width="128" hspace="16" alt="wordmark icon">
 
-<h3>taag-wordmarks</h3>
+<h3>wordmark</h3>
 
 <p>
   <sub>1,342 TAAG FONTS, ONE WORD AT A TIME</sub>
@@ -8,7 +8,7 @@
   <strong>Type a word and flip through every TAAG font in the terminal, recoloured from your own palette.</strong>
   <br>
   <br>
-  <a href="https://github.com/morris-frank/taag-wordmarks/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/morris-frank/taag-wordmarks/ci.yml?style=flat-square&amp;label=CI&amp;labelColor=2D2825&amp;color=7E9688" alt="CI"></a>
+  <a href="https://github.com/morris-frank/wordmark/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/morris-frank/wordmark/ci.yml?style=flat-square&amp;label=CI&amp;labelColor=2D2825&amp;color=7E9688" alt="CI"></a>
   <img src="https://img.shields.io/badge/python-%E2%89%A53.11%2C%20stdlib%20only-D78A7A?style=flat-square&amp;labelColor=2D2825" alt="Python 3.11+, stdlib only">
   <img src="https://img.shields.io/badge/fonts-1%2C342%20%C2%B7%201%2C013%20colour-D78A7A?style=flat-square&amp;labelColor=2D2825" alt="1,342 fonts, 1,013 in colour">
   <img src="https://img.shields.io/badge/OS-macOS%20%C2%B7%20Linux-7E9688?style=flat-square&amp;labelColor=2D2825" alt="macOS, Linux">
@@ -18,12 +18,12 @@
 <br clear="left">
 
 ```sh
-python3 <(curl -fsSL https://raw.githubusercontent.com/morris-frank/taag-wordmarks/main/wordmarks.py)
+python3 <(curl -fsSL https://raw.githubusercontent.com/morris-frank/wordmark/main/wordmarks.py)
 ```
 
 That one line runs it with nothing installed. The first run downloads the 2.7 MB glyph
-dataset into `~/.cache/taag-wordmarks/` and writes a config to
-`~/.config/taag-wordmarks/config.toml`. It needs Python 3.11 or newer and a truecolour
+dataset into `~/.cache/wordmark/` and writes a config to
+`~/.config/wordmark/config.toml`. It needs Python 3.11 or newer and a truecolour
 terminal; macOS's bundled `/usr/bin/python3` is 3.9, so use a Homebrew, mise or uv Python.
 
 ## Keys
@@ -97,7 +97,7 @@ describes the format, the compose rules and what they reproduce.
 Needs mise. Everything else comes from `mise.toml`.
 
 ```sh
-git clone https://github.com/morris-frank/taag-wordmarks && cd taag-wordmarks
+git clone https://github.com/morris-frank/wordmark && cd wordmark
 mise run setup   # toolchain, hooks, verify
 mise run run     # the TUI, from the clone's data/
 ```

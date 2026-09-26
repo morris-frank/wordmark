@@ -3,7 +3,7 @@
 
 Usage:
   wordmarks.py [WORD] [--font NAME] [--theme NAME] [--max-height N] [--config PATH]
-  python3 <(curl -fsSL https://raw.githubusercontent.com/morris-frank/taag-wordmarks/main/wordmarks.py)
+  python3 <(curl -fsSL https://raw.githubusercontent.com/morris-frank/wordmark/main/wordmarks.py)
 
 Keys: ↑/↓ font  PgUp/PgDn ±20  TAB/⇧TAB section  ←/→ style  ^T theme
       - + max height  0 any height  a–z A–Z space type  ⌫ delete
@@ -19,13 +19,13 @@ import urllib.request
 from base64 import b64encode
 from pathlib import Path
 
-DATA_URL = "https://raw.githubusercontent.com/morris-frank/taag-wordmarks/main/data/taag-glyphs.json.gz"
-APP = "taag-wordmarks"
+DATA_URL = "https://raw.githubusercontent.com/morris-frank/wordmark/main/data/taag-glyphs.json.gz"
+APP = "wordmark"
 CONFIG = Path(os.environ.get("XDG_CONFIG_HOME", "~/.config")).expanduser() / APP / "config.toml"
 CACHE = Path(os.environ.get("XDG_CACHE_HOME", "~/.cache")).expanduser() / APP / "taag-glyphs.json.gz"
 
 DEFAULT_CONFIG = """\
-# taag-wordmarks config. ←/→ cycles [[styles]] in order; TAB cycles [themes] in order.
+# wordmark config. ←/→ cycles [[styles]] in order; TAB cycles [themes] in order.
 # A colour is "#RRGGBB" or a table with one value per theme. Styles name colours
 # from [colors] or give a hex directly. Delete this file to get the defaults back.
 # Defaults: the Soilytix design system (Obsidian ink, Lime accent).
