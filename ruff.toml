@@ -1,0 +1,14 @@
+line-length = 120
+target-version = "py311"  # tomllib is the floor
+
+[lint]
+select = ["E", "F", "W", "B", "S"]
+# E701/E702: one-line `if …: x = y` branches keep the key dispatch table readable.
+ignore = ["E701", "E702", "E401", "B905"]  # plus: one-line stdlib imports; zip over fixed RGB triples
+
+[lint.per-file-ignores]
+# The clipboard fallbacks shell out to fixed binaries found with shutil.which.
+"wordmarks.py" = ["S603", "S310"]
+
+[format]
+quote-style = "double"

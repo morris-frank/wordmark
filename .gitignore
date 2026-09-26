@@ -1,0 +1,12 @@
+# secrets — always
+.env
+.env.local
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+# Python / tool caches
+__pycache__/
+.ruff_cache/
+.mise/
+.prek/

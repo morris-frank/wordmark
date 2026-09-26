@@ -1,0 +1,34 @@
+# The prek hook config IS the lint gate: per-file at commit, whole repo in CI.
+default_stages: [pre-commit]
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+        exclude: ^data/sources/  # raw font files stay byte-exact as captured
+      - id: end-of-file-fixer
+        exclude: ^data/sources/
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=4096]  # the dataset bundle is ~2.7 MB; TheDraw bundles up to ~0.6 MB
+  - repo: local
+    hooks:
+      # language: system so hooks call the mise-managed binaries — versions live in mise.toml only.
+      - id: ruff-check
+        name: ruff check
+        entry: mise exec -- ruff check --fix
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff format
+        entry: mise exec -- ruff format --check
+        language: system
+        types: [python]
+      - id: gitleaks
+        name: gitleaks (staged)
+        entry: mise exec -- gitleaks git --staged --redact --verbose
+        language: system
+        pass_filenames: false

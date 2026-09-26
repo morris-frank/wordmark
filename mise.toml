@@ -1,0 +1,48 @@
+# mise is the single source of truth for the toolchain.
+# Exact resolved versions are recorded in mise.lock (committed).
+min_version = "2026.7.0"
+
+[settings]
+lockfile = true  # write mise.lock for reproducibility
+
+[tools]
+python = "3.14"      # wordmarks.py is stdlib-only; needs >= 3.11 for tomllib
+ruff = "0.15"
+prek = "latest"      # fast Rust drop-in for pre-commit; pre-1.0, churn expected
+gitleaks = "latest"  # secret scan at commit + CI
+
+[env]
+_.file = [".env", ".env.local"]  # auto-load secrets for every tool
+
+[tasks.setup]
+description = "cold start: toolchain, hooks, verify"
+run = ["mise install", "prek install", "prek install -t pre-push", "mise run check"]
+
+[tasks.install]
+description = "toolchain + hooks, no verify"
+run = ["mise install", "prek install", "prek install -t pre-push"]
+
+[tasks.run]
+description = "start the TUI from this clone (uses data/, not the download)"
+run = "python wordmarks.py"
+
+[tasks.dataset]
+description = "rebuild data/taag-glyphs.json.gz from an unzipped TAAG glyph capture"
+usage = 'arg "<capture>" help="path to the unzipped taag-glyphs folder"'
+run = "python scripts/build-dataset.py {{usage.capture}}"
+
+[tasks.lint]
+run = "ruff check ."
+
+[tasks.fmt]
+run = "ruff format ."
+
+[tasks.hooks]
+run = "prek run --all-files"
+
+[tasks.secrets]
+run = "gitleaks dir . --redact --verbose"
+
+[tasks.check]
+description = "everything CI runs — the definition of done"
+depends = ["hooks"]

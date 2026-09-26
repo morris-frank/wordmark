@@ -1,0 +1,8 @@
+# Normalize to LF regardless of OS — keeps scripts runnable, kills diff noise.
+* text=auto eol=lf
+*.sh text eol=lf
+# Lockfiles are generated; treat as such (cleaner diffs/reviews).
+mise.lock linguist-generated=true
+# The dataset: binary bundle and raw font files, byte-exact as captured.
+*.gz binary
+data/sources/** -text linguist-vendored=true
