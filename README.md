@@ -35,7 +35,7 @@ section and colour style below.
 |---|---|
 | `↑` `↓` | previous / next font |
 | `PgUp` `PgDn` | 20 fonts back / forward |
-| `Tab` `Shift-Tab` | next / previous section (Featured, Regular, ANSI, AOL, TOIlet, TheDraw) |
+| `Tab` `Shift-Tab` | next / previous section (Favourites, Featured, Regular, ANSI, AOL, TOIlet, TheDraw) |
 | `←` `→` | previous / next colour style |
 | `-` `+` | lower / raise the maximum font height in lines; the index shows the cap |
 | `0` | any height again |
@@ -69,6 +69,7 @@ is read on every start. Delete it to get the defaults back.
 | `word` | `maurice` | the starting word |
 | `theme` | `dark` | the starting theme; `Ctrl-T` cycles `[themes]` in file order |
 | `max_height` | unset | only fonts at most this many lines tall |
+| `favourites` | 56 names | font names for a Favourites section, first in the list; a name shared by several fonts brings all of them |
 | `[themes.<name>]` | `dark`, `light` | `page` (background) and `muted` (labels) |
 | `[colors]` | lime, ink, soil, gold, azure, rose | named colours: `"#RRGGBB"`, or `{ dark = "…", light = "…" }` per theme |
 | `[[styles]]` | six styles | what `←` `→` cycles, in file order |

@@ -34,6 +34,20 @@ word = "maurice"
 theme = "dark"
 # max_height = 6        # only fonts at most this many lines tall; - and + change it live
 
+# The Favourites section, first in the list (Tab gets back to it). Names match TAAG's,
+# ignoring case; a name shared by several fonts (Elite, Nightmare) brings all of them.
+favourites = [
+  "Neurosis 1", "Nice", "NeurosisSim", "Nightmare", "News", "Neon", "LINE!Limpy",
+  "KeWl", "Inertia", "Hobbes", "HgSierraT", "Fungi", "Friendship", "Font 64",
+  "Font 34", "FocusPop", "File", "FBR", "FB-Gothic", "FB-CheapLine", "EMS", "Elusive",
+  "Elite", "effekt", "DRG", "Donnow", "DC Font", "Darknesses", "Darklands", "Cfh 3",
+  "Boxfight", "Bow Font", "Bone", "BoldMedium", "Blunder Smal", "BIG!Limpy",
+  "BigOutline", "Ansiltr5", "Ansiltr4", "Ansiltr3", "Red Phoenix", "DOS Rebel",
+  "Cybermedium", "Small Mono 999", "Small Braille", "Small Block", "Rebel", "Pagga",
+  "Mono 9", "Coder Mini", "ANSI Shadow", "ANSI Regular", "ANSI Compact", "RubiFont",
+  "miniwi", "BlurVision ASCII",
+]
+
 [themes.dark]
 page = "#171916"
 muted = "#CED0CF"
@@ -305,6 +319,19 @@ def font_height(font):
 class App:
     def __init__(self, fonts, cfg, word, font, theme, max_height=None):
         self.cfg, self.word = cfg, word
+        by_name = {}
+        for f in fonts:
+            by_name.setdefault(f["name"].lower(), []).append(f)
+        favs = cfg.get("favourites", [])
+        missing = [n for n in favs if n.lower() not in by_name]
+        seen = set()
+        fav_fonts = [
+            {**f, "section": "Favourites"}
+            for n in favs
+            for f in by_name.get(n.lower(), [])
+            if id(f) not in seen and not seen.add(id(f))
+        ]
+        fonts = fav_fonts + fonts
         for f in fonts:
             f["height"] = font_height(f)
         self.all = fonts
@@ -316,6 +343,8 @@ class App:
         self.theme = theme if theme in self.themes else self.themes[0]
         self.style = 0
         self.flash, self.flash_until = "", 0.0
+        if missing:
+            self.flash, self.flash_until = f"unknown favourite: {', '.join(missing)}", time.monotonic() + 4
 
     def set_filter(self, max_height, keep):
         """Show only fonts at most max_height lines tall; stay on font `keep` or the nearest one after it."""
