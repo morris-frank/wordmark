@@ -35,9 +35,11 @@ section and colour style below.
 |---|---|
 | `↑` `↓` | previous / next font |
 | `PgUp` `PgDn` | 20 fonts back / forward |
-| `[` `]` | previous / next section (Featured, Regular, ANSI, AOL, TOIlet, TheDraw) |
+| `Tab` `Shift-Tab` | next / previous section (Featured, Regular, ANSI, AOL, TOIlet, TheDraw) |
 | `←` `→` | previous / next colour style |
-| `Tab` | next theme (dark, light) |
+| `-` `+` | lower / raise the maximum font height in lines; the index shows the cap |
+| `0` | any height again |
+| `Ctrl-T` | next theme (dark, light) |
 | `a`–`z`, `A`–`Z`, `Space` | type into the word; Shift gives capitals |
 | `Backspace` | delete the last letter |
 | `Ctrl-Y` | copy the wordmark as plain text |
@@ -51,11 +53,11 @@ lowercase of their own, so there `maurice` and `MAURICE` look the same.
 ## Options
 
 ```sh
-python3 wordmarks.py [WORD] [--font NAME] [--theme NAME] [--config PATH]
+python3 wordmarks.py [WORD] [--font NAME] [--theme NAME] [--max-height N] [--config PATH]
 ```
 
 `WORD` overrides the config's `word` (default `maurice`). `--font` starts on a font by
-exact name, ignoring case.
+exact name, ignoring case. `--max-height` starts with the height filter set.
 
 ## Configuration
 
@@ -65,7 +67,8 @@ is read on every start. Delete it to get the defaults back.
 | Key | Default | Holds |
 |---|---|---|
 | `word` | `maurice` | the starting word |
-| `theme` | `dark` | the starting theme; `Tab` cycles `[themes]` in file order |
+| `theme` | `dark` | the starting theme; `Ctrl-T` cycles `[themes]` in file order |
+| `max_height` | unset | only fonts at most this many lines tall |
 | `[themes.<name>]` | `dark`, `light` | `page` (background) and `muted` (labels) |
 | `[colors]` | lime, ink, soil, gold, azure, rose | named colours: `"#RRGGBB"`, or `{ dark = "…", light = "…" }` per theme |
 | `[[styles]]` | six styles | what `←` `→` cycles, in file order |
@@ -80,7 +83,7 @@ Each style has a `name` and a `kind`:
 | `ansi-ramp` | `color` | colour fonts: every ANSI colour on one ramp, by lightness |
 | `ansi-original` | none | colour fonts: the font's own 16 colours, as VGA RGB |
 
-The `ansi-*` styles appear only on colour fonts. Plain fonts cycle the rest.
+Colour fonts cycle only the `ansi-*` styles, so their shading is never flattened; plain fonts cycle the rest.
 
 ## Dataset
 

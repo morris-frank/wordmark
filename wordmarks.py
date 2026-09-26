@@ -2,11 +2,12 @@
 """wordmarks — type a word, browse it in 1,342 TAAG fonts, recoloured from a config.
 
 Usage:
-  wordmarks.py [WORD] [--font NAME] [--theme NAME] [--config PATH]
+  wordmarks.py [WORD] [--font NAME] [--theme NAME] [--max-height N] [--config PATH]
   python3 <(curl -fsSL https://raw.githubusercontent.com/morris-frank/taag-wordmarks/main/wordmarks.py)
 
-Keys: ↑/↓ font  PgUp/PgDn ±20  [ ] section  ←/→ style  TAB theme
-      a–z A–Z space type  ⌫ delete  ^Y copy text  ^A copy with colour  ESC quit
+Keys: ↑/↓ font  PgUp/PgDn ±20  TAB/⇧TAB section  ←/→ style  ^T theme
+      - + max height  0 any height  a–z A–Z space type  ⌫ delete
+      ^Y copy text  ^A copy with colour  ESC quit
 
 The dataset is data/taag-glyphs.json.gz next to this file, or else downloaded once
 into the cache. The config is created on first run with the Soilytix palette.
@@ -31,6 +32,7 @@ DEFAULT_CONFIG = """\
 
 word = "maurice"
 theme = "dark"
+# max_height = 6        # only fonts at most this many lines tall; - and + change it live
 
 [themes.dark]
 page = "#171916"
@@ -54,6 +56,7 @@ rose = "#D76EB9"
 #                         greys take `neutral`; shade is kept by blending from the page
 # kind = "ansi-ramp"      colour fonts only: every ANSI colour on one ramp by lightness
 # kind = "ansi-original"  colour fonts only: the font's own 16 colours (VGA RGB)
+# Colour fonts cycle only the ansi-* styles; plain fonts only the others.
 
 [[styles]]
 name = "solid lime"
@@ -288,21 +291,61 @@ def copy(text):
 
 
 # ---- TUI ---------------------------------------------------------------------
+def font_height(font):
+    """Tallest glyph in lines, ignoring blank padding rows at the bottom."""
+    h = 0
+    for g in font["glyphs"].values():
+        rows = g["text"].rstrip("\n").split("\n")
+        while rows and not rows[-1].strip():
+            rows.pop()
+        h = max(h, len(rows))
+    return h
+
+
 class App:
-    def __init__(self, fonts, cfg, word, font, theme):
-        self.fonts, self.cfg, self.word = fonts, cfg, word
-        self.i = next((k for k, f in enumerate(fonts) if f["name"].lower() == font.lower()), 0) if font else 0
+    def __init__(self, fonts, cfg, word, font, theme, max_height=None):
+        self.cfg, self.word = cfg, word
+        for f in fonts:
+            f["height"] = font_height(f)
+        self.all = fonts
+        self.heights = sorted({f["height"] for f in fonts})
+        self.max_height = None
+        start = next((k for k, f in enumerate(fonts) if f["name"].lower() == font.lower()), 0) if font else 0
+        self.set_filter(max_height, start)
         self.themes = list(cfg["themes"])
         self.theme = theme if theme in self.themes else self.themes[0]
         self.style = 0
         self.flash, self.flash_until = "", 0.0
 
+    def set_filter(self, max_height, keep):
+        """Show only fonts at most max_height lines tall; stay on font `keep` or the nearest one after it."""
+        if max_height is not None and max_height < self.heights[0]:
+            max_height = self.heights[0]  # never filter down to nothing
+        self.max_height = max_height
+        self.view = [k for k, f in enumerate(self.all) if max_height is None or f["height"] <= max_height]
+        self.i = next((p for p, k in enumerate(self.view) if k >= keep), 0)
+
+    def step_height(self, step):
+        hs = self.heights
+        cur = self.max_height if self.max_height is not None else hs[-1]
+        if step < 0:
+            nxt = next((h for h in reversed(hs) if h < cur), hs[0])
+        else:
+            nxt = next((h for h in hs if h > cur), None)
+            nxt = None if nxt is None or nxt == hs[-1] else nxt  # the tallest step means no filter
+        self.set_filter(nxt, self.view[self.i])
+
+    @property
+    def fonts(self):
+        return [self.all[k] for k in self.view]
+
     @property
     def font(self):
-        return self.fonts[self.i]
+        return self.all[self.view[self.i]]
 
     def styles(self):
-        return [s for s in self.cfg["styles"] if self.font["colored"] or not s["kind"].startswith("ansi")]
+        # Colour fonts get only the ANSI recolourings; plain fonts only the character styles.
+        return [s for s in self.cfg["styles"] if s["kind"].startswith("ansi") == bool(self.font["colored"])]
 
     def current(self):
         ss = self.styles()
@@ -331,7 +374,8 @@ class App:
             buf.append(f"\x1b[{top + k};{left}H{s}")
         if not shown:
             buf.append(centre(top, "type a word" if not self.word else f"no glyphs for {self.word!r} in this font"))
-        index = self.flash if time.monotonic() < self.flash_until else f"{self.i + 1} / {len(self.fonts)}"
+        cap = f" · ≤ {self.max_height} lines" if self.max_height is not None else ""
+        index = self.flash if time.monotonic() < self.flash_until else f"{self.i + 1} / {len(self.view)}{cap}"
         crop = " · cropped" if w > cols or len(painted) > avail else ""
         buf.append(centre(top - 2, index))
         buf.append(
@@ -340,25 +384,27 @@ class App:
         buf.append(
             centre(
                 lines,
-                "↑↓ font  ←→ style  [ ] section  tab theme  a–z type  ⌫ delete  ^Y copy  ^A copy colour  esc quit",
+                "↑↓ font  ←→ style  tab section  ^T theme  - + height  0 any  "
+                "a–z type  ⌫ delete  ^Y copy  ^A colour  esc quit",
             )
         )
         sys.stdout.write("".join(buf))
         sys.stdout.flush()
 
     def jump_section(self, step):
-        n, sec, j = len(self.fonts), self.font["section"], self.i
-        while self.fonts[j]["section"] == sec:
+        fonts = self.fonts
+        n, sec, j = len(fonts), self.font["section"], self.i
+        while fonts[j]["section"] == sec:
             j = (j + step) % n
             if j == self.i:
                 return
         if step < 0:  # land on the first font of the previous section
-            while self.fonts[(j - 1) % n]["section"] == self.fonts[j]["section"]:
+            while fonts[(j - 1) % n]["section"] == fonts[j]["section"] and (j - 1) % n != self.i:
                 j = (j - 1) % n
         self.i = j
 
     def key(self, k):
-        n = len(self.fonts)
+        n = len(self.view)
         moves = {"\x1b[A": -1, "\x1bOA": -1, "\x1b[B": 1, "\x1bOB": 1, "\x1b[5~": -20, "\x1b[6~": 20}
         if k in ("\x1b", "\x03"):
             return False
@@ -368,12 +414,18 @@ class App:
             self.style += 1
         elif k in ("\x1b[D", "\x1bOD"):
             self.style -= 1
-        elif k == "\t":
+        elif k == "\x14":  # ^T
             self.theme = self.themes[(self.themes.index(self.theme) + 1) % len(self.themes)]
-        elif k == "]":
+        elif k == "\t":
             self.jump_section(1)
-        elif k == "[":
+        elif k == "\x1b[Z":  # shift-tab
             self.jump_section(-1)
+        elif k == "-":
+            self.step_height(-1)
+        elif k in ("+", "="):
+            self.step_height(1)
+        elif k == "0":
+            self.set_filter(None, self.view[self.i])
         elif k in ("\x7f", "\x08"):
             self.word = self.word[:-1]
         elif k == " " or (len(k) == 1 and k.isascii() and k.isalpha()):
@@ -398,6 +450,7 @@ def main():
     ap.add_argument("word", nargs="?")
     ap.add_argument("--font", help="start on this font (exact name, case-insensitive)")
     ap.add_argument("--theme")
+    ap.add_argument("--max-height", type=int, help="only fonts at most this many lines tall")
     ap.add_argument("--config", type=Path, default=CONFIG, help=f"default {CONFIG}")
     a = ap.parse_args()
     cfg = load_config(a.config)
@@ -407,6 +460,7 @@ def main():
         a.word if a.word is not None else cfg.get("word", "maurice"),
         a.font,
         a.theme or cfg.get("theme", "dark"),
+        a.max_height or cfg.get("max_height"),
     )
 
     fd = sys.stdin.fileno()
