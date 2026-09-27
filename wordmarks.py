@@ -25,7 +25,7 @@ CONFIG = Path(os.environ.get("XDG_CONFIG_HOME", "~/.config")).expanduser() / APP
 CACHE = Path(os.environ.get("XDG_CACHE_HOME", "~/.cache")).expanduser() / APP / "taag-glyphs.json.gz"
 
 DEFAULT_CONFIG = """\
-# wordmark config. ←/→ cycles [[styles]] in order; TAB cycles [themes] in order.
+# wordmark config. ←/→ cycles [[styles]] in order; ^T cycles [themes] in order.
 # A colour is "#RRGGBB" or a table with one value per theme. Styles name colours
 # from [colors] or give a hex directly. Delete this file to get the defaults back.
 # Defaults: the Soilytix design system (Obsidian ink, Lime accent).
