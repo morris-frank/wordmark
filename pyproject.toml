@@ -1,0 +1,35 @@
+[project]
+name = "wordmark"
+version = "0.1.0"
+description = "Type a word and flip through every TAAG font in the terminal, recoloured from your own palette."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Maurice Frank", email = "maurice@soilytix.com" }]
+requires-python = ">=3.11"
+dependencies = []
+keywords = ["ascii-art", "figlet", "tui", "terminal", "wordmark"]
+classifiers = [
+  "Environment :: Console :: Curses",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Topic :: Terminals",
+]
+
+[project.urls]
+Homepage = "https://github.com/morris-frank/wordmark"
+
+[project.scripts]
+wordmark = "wordmarks:main"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+# The wheel is the one module; the dataset downloads into the cache on first run.
+[tool.hatch.build.targets.wheel]
+only-include = ["wordmarks.py"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["wordmarks.py", "README.md", "LICENSE"]

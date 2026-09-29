@@ -1,4 +1,4 @@
-<img src="brand/icon/icon-wordmark-on-obsidian-1024.png" align="left" width="128" hspace="16" alt="wordmark icon">
+<img src="https://raw.githubusercontent.com/morris-frank/wordmark/main/brand/icon/icon-wordmark-on-obsidian-1024.png" align="left" width="128" hspace="16" alt="wordmark icon">
 
 <h3>wordmark</h3>
 
@@ -25,6 +25,12 @@ That one line runs it with nothing installed. The first run downloads the 2.7 MB
 dataset into `~/.cache/wordmark/` and writes a config to
 `~/.config/wordmark/config.toml`. It needs Python 3.11 or newer and a truecolour
 terminal; macOS's bundled `/usr/bin/python3` is 3.9, so use a Homebrew, mise or uv Python.
+
+To keep it around as a `wordmark` command:
+
+```sh
+uv tool install wordmark   # or: pipx install wordmark
+```
 
 ## Keys
 
